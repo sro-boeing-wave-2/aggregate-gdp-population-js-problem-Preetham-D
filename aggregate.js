@@ -7,7 +7,7 @@ const fs = require('fs');
 const aggregate = (filePath) => {
   //  import Papa.parse from'./node_modules/papaparse/papaparse';
 
-  const text = fs.readFileSync(filePath, 'utf8').replace(/"/g, '').split('\r\n');
+  const text = fs.readFileSync(filePath, 'utf8').replace(/"/g, '').split('\n');
   const mapContinent = fs.readFileSync('cc-mapping.txt', 'utf8').split('\n');
   // console.log(mapContinent[1]);
   // console.log(text.length);
