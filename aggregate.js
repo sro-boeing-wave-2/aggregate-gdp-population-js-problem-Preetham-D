@@ -53,22 +53,23 @@ const aggregate = (filePath) => {
   const populationSum = new Map();
   // console.log(country.length)
   for (let i = 0; i < country.length; i += 1) {
-    //  console.log(mapping.get(country[i]));
+    //  console.log(x);
     // console.log(continent[i]);
-    if (gdpSum.has(mapping.get(country[i]))) {
-      // console.log(mapping.get(country[i]));
-      gdpSum.set(mapping.get(country[i]), parseFloat(gdpSum.get(mapping.get(country[i])) + parseFloat(gdp[i])));
-      populationSum.set(mapping.get(country[i]), parseFloat(populationSum.get(mapping.get(country[i])) + parseFloat(population[i])));
+    const x = mapping.get(country[i]);
+    if (gdpSum.has(x)) {
+      // console.log(x);
+      gdpSum.set(x, parseFloat(gdpSum.get(x) + parseFloat(gdp[i])));
+      populationSum.set(x, parseFloat(populationSum.get(x) + parseFloat(population[i])));
     } else {
       gdpSum.set(mapping.get((country[i])), parseFloat(gdp[i]));
-      populationSum.set(mapping.get(country[i]), parseFloat(population[i]));
+      populationSum.set(x, parseFloat(population[i]));
     }
   }
   for (let i = 0; i < 6; i += 1) {
     output[continent[i]].GDP_2012 = gdpSum.get(continent[i]);
     output[continent[i]].POPULATION_2012 = populationSum.get(continent[i]);
   }
-  jasonOut = JSON.stringify(output);
+  const jasonOut = JSON.stringify(output);
   // console.log(jasonOut);
   fs.writeFileSync('./output/output.json', jasonOut);
 };
