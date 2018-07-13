@@ -3,75 +3,68 @@
  * @param {*} filePath
  */
 const fs = require('fs');
+const reader = require('./file-read');
 
-const aggregate = (filePath) => {
-  //  import Papa.parse from'./node_modules/papaparse/papaparse';
-
-  const text = fs.readFileSync(filePath, 'utf8').replace(/"/g, '').split('\n');
-  const mapContinent = fs.readFileSync('cc-mapping.txt', 'utf8').split('\n');
-  // console.log(mapContinent[1]);
-  // console.log(text.length);
-  const arr = [];
+const aggregate = filePath => new Promise((resolve) => {
+  // const reader = require('./file-read');
+  // console.log('HEy');
+  const datafile = [];
+  const countryContinent = [];
+  let mapCountryContinent = new Map();
   const country = [];
-  const population = [];
   const gdp = [];
-  const map = [];
-  // let j = 0;
-  // mapContinent=[[argentina,SouthAmerica],[Brazil,SouthAmerica],]
-  for (let i = 1; i < text.length - 1; i += 1) {
-    // console.log(text[i]);
-    arr.push(text[i].split(','));
-  }
-  for (let i = 0; i < arr.length - 1; i += 1) {
-    country.push(arr[i][0]);
-    population.push(arr[i][4]);
-    gdp.push(arr[i][7]);
-  }
-  for (let i = 1; i < mapContinent.length - 1; i += 1) {
-    map.push(mapContinent[i].split(','));
-  }
-  const mapping = new Map(map);
-  // let temp = [];
-  // temp = country.map(x => mapping.get(x));
-  // console.log(arr[3][0]);
-  // console.log(arr[3][4]);
-  // console.log(map[1][1]);
-  // console.log(temp);
+  const population = [];
   const output = {};
-  // country_obj = {};
   const continent = ['South America', 'Oceania', 'North America', 'Asia', 'Europe', 'Africa'];
+  Promise.all([reader(filePath), reader('./cc-mapping.txt')]).then((values) => {
+    // console.log("Reached");
+    values[0].forEach(e => datafile.push(e.split(',')));
+    for (let i = 1; i < datafile.length - 2; i += 1) {
+      country.push(datafile[i][0]);
+      population.push(datafile[i][4]);
+      gdp.push(datafile[i][7]);
+    }
+    // console.log(country);
+    values[1].forEach(e => countryContinent.push(e.split(',')));
+    mapCountryContinent = new Map(countryContinent);
+    const gdpSum = new Map();
+    const populationSum = new Map();
+    let x = '';
+    // console.log(country.length)
+    for (let i = 0; i < country.length; i += 1) {
+      //  console.log(x);
+      // console.log(continent[i]);
+      x = mapCountryContinent.get(country[i]);
+      if (gdpSum.has(x)) {
+        // console.log(x);
+        gdpSum.set(x, parseFloat(gdpSum.get(x) + parseFloat(gdp[i])));
+        populationSum.set(x, parseFloat(populationSum.get(x) + parseFloat(population[i])));
+      } else {
+        gdpSum.set((x), parseFloat(gdp[i]));
+        populationSum.set(x, parseFloat(population[i]));
+      }
+    }
+    // console.log(gdpSum);
+    // console.log(populationSum);
+    for (let i = 0; i < 6; i += 1) {
+      output[continent[i]].GDP_2012 = gdpSum.get(continent[i]);
+      output[continent[i]].POPULATION_2012 = populationSum.get(continent[i]);
+    }
+    const jasonOut = JSON.stringify(output);
+    fs.writeFile('./output/output.json', jasonOut, () => {
+      resolve();
+    });
+    // console.log(jasonOut);
+
+    // console.log(mapCountryContinent);
+  });
   // console.log(continent[3]);
   for (let i = 0; i < 6; i += 1) {
     output[continent[i]] = {
       GDP_2012: 0,
       POPULATION_2012: 0,
-
     };
   }
-  // console.log(output[continent[1]]);
-  const gdpSum = new Map();
-  const populationSum = new Map();
-  // console.log(country.length)
-  for (let i = 0; i < country.length; i += 1) {
-    //  console.log(x);
-    // console.log(continent[i]);
-    const x = mapping.get(country[i]);
-    if (gdpSum.has(x)) {
-      // console.log(x);
-      gdpSum.set(x, parseFloat(gdpSum.get(x) + parseFloat(gdp[i])));
-      populationSum.set(x, parseFloat(populationSum.get(x) + parseFloat(population[i])));
-    } else {
-      gdpSum.set(mapping.get((country[i])), parseFloat(gdp[i]));
-      populationSum.set(x, parseFloat(population[i]));
-    }
-  }
-  for (let i = 0; i < 6; i += 1) {
-    output[continent[i]].GDP_2012 = gdpSum.get(continent[i]);
-    output[continent[i]].POPULATION_2012 = populationSum.get(continent[i]);
-  }
-  const jasonOut = JSON.stringify(output);
-  // console.log(jasonOut);
-  fs.writeFileSync('./output/output.json', jasonOut);
-};
+});
 
 module.exports = aggregate;
