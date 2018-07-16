@@ -7,7 +7,6 @@ const reader = require('./file-read');
 
 const aggregate = filePath => new Promise((resolve) => {
   // const reader = require('./file-read');
-  // console.log('HEy');
   const datafile = [];
   const countryContinent = [];
   let mapCountryContinent = new Map();
@@ -17,12 +16,14 @@ const aggregate = filePath => new Promise((resolve) => {
   const output = {};
   const continent = ['South America', 'Oceania', 'North America', 'Asia', 'Europe', 'Africa'];
   Promise.all([reader(filePath), reader('./cc-mapping.txt')]).then((values) => {
-    // console.log("Reached");
     values[0].forEach(e => datafile.push(e.split(',')));
+    const indexOfCountry = datafile[0].indexOf('Country Name');
+    const indexOfPopulation = datafile[0].indexOf('Population (Millions) - 2012');
+    const indexOfGdp = datafile[0].indexOf('GDP Billions (US Dollar) - 2012');
     for (let i = 1; i < datafile.length - 2; i += 1) {
-      country.push(datafile[i][0]);
-      population.push(datafile[i][4]);
-      gdp.push(datafile[i][7]);
+      country.push(datafile[i][indexOfCountry]);
+      population.push(datafile[i][indexOfPopulation]);
+      gdp.push(datafile[i][indexOfGdp]);
     }
     // console.log(country);
     values[1].forEach(e => countryContinent.push(e.split(',')));
@@ -54,11 +55,11 @@ const aggregate = filePath => new Promise((resolve) => {
     fs.writeFile('./output/output.json', jasonOut, () => {
       resolve();
     });
-    // console.log(jasonOut);
+    console.log(jasonOut);
 
     // console.log(mapCountryContinent);
   });
-  // console.log(continent[3]);
+  console.log(continent[3]);
   for (let i = 0; i < 6; i += 1) {
     output[continent[i]] = {
       GDP_2012: 0,

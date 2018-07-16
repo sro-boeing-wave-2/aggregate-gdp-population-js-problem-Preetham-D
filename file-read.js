@@ -5,6 +5,7 @@ const reader = filePath => new Promise((resolve) => {
     resolve(data.replace(/"/g, '').split('\n'));
   });
 });
+
 // console.log(reader('./data/datafile.csv'));
 // let datafile = [];
 // const countryContinent = [];
